@@ -33,9 +33,11 @@ abstract class Product
         $this->ProductModel->setPrice($attributes['price']);
     }
 
-    public static function deleteAll(array $sku):bool
+    public static function deleteAll(?array $sku):bool
     {
-        return (new ModelsProduct())->deleteIN($sku);
+        if($sku !== null)
+            return (new ModelsProduct())->deleteIN($sku);
+        return false;
     }
 
 }
