@@ -19,7 +19,7 @@
             <h3 class='col-8 header'>product list</h3>
             <div class="buttons col-4">
                 <a class='btn btn-primary' href="addproduct">ADD</a>
-                <button class='btn btn-danger ' id='delete-product-ptn'>MASS DELETE</button>
+                <button class='btn btn-danger ' id='delete-product-btn'>MASS DELETE</button>
             </div>
            
         </div>
