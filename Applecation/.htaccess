@@ -1,0 +1,10 @@
+#allow all .JPG
+<FilesMatch "\.JPG$">
+    Order Allow,Deny
+    Allow From all  
+</FilesMatch>
+#allow all .php files and if replace Allow with Deny will not allow it
+<FilesMatch "\.php$">
+    Order Allow,Deny
+    Allow From all  
+</FilesMatch>
