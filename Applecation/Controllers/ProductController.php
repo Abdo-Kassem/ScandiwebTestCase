@@ -55,7 +55,7 @@ class ProductController
 
     public function deleteAll()
     {
-        $skus = filter_input(INPUT_GET,'skus');
+        $skus = $_GET['skus'];
 
         $status = Product::deleteAll($skus);
         

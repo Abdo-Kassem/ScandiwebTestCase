@@ -1,3 +1,6 @@
+*{
+    box-sizing: border-box;
+}
 .hidden{
     display: none;
 }
@@ -35,7 +38,7 @@
     padding:15px;
     border: 2px solid rgb(99, 99, 99);
     width:22%;
-    margin:20px 0;
+    margin:20px 1.5%;
 }
 .product .span{
     display:block;

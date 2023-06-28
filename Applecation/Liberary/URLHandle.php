@@ -1,10 +1,8 @@
 <?php
 
 use Applecation\Controllers\ProductController;
-use Applecation\Liberary\View;
 use ScandiWeb\Applecation\Routes\URLGenerator;
 
-require 'C:\xampp\htdocs\ScandiWeb\Applecation\Routes\URLGenerator.php';
 class URLHandle
 {
     use URLGenerator;
@@ -21,14 +19,6 @@ class URLHandle
         $controller = new $controllerNamespace();
 
         $controller->{$this->action}();
-
-        /*if($_SERVER['REQUEST_METHOD'] === 'GET' && count($_GET)>0)
-            $controller->{$this->action}($_GET);
-        else if($_SERVER['REQUEST_METHOD'] === 'GET' && count($_GET) == 0)
-            $controller->{$this->action}();
-        else 
-            $controller->{$this->action}($_POST);
-        */
         
    }
 
@@ -60,7 +50,6 @@ class URLHandle
             header('location: http://localhost/scandiweb');
         }
 
-      
    }
 
 }

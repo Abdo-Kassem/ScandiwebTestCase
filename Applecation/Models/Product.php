@@ -3,7 +3,6 @@
 namespace Applecation\Models;
 
 use Exception;
-use PDO;
 
 require_once 'Model.php';
 
@@ -16,7 +15,6 @@ class Product extends Model
     private ?float $size;
 
     private ?float $height,$width,$length;
-    protected string $where;
 
 
     public function __construct()
@@ -54,51 +52,6 @@ class Product extends Model
     public function setHeigth(?int $height) {$this->height = $height;}
     public function getHeight() { return $this->height;}
 
-
-    //update current object
-    public  function update():bool
-    {
-        $this->columnsEmpty();
-
-        $product = $this->checkProductType();
-
-        if($product === 'dvd') {
-
-            $sql = 'UPDATE products SET sku = :sku , productName = :productName , size = :size , price = :price WHERE sku = :sku';
-            $pdoStatement = $this->pdo->prepare($sql);
-            return $pdoStatement->execute([
-                        ':sku'=>$this->sku,':productName'=>$this->productName,
-                        ':price'=>$this->price,':size'=>$this->size,
-                    ]);
-
-        }elseif($product === 'book') {
-
-            $sql = 'UPDATE products SET sku = :sku , productName = :productName , weight = :weight , price = :price WHERE sku = :sku';
-            $pdoStatement = $this->pdo->prepare($sql);
-            return $pdoStatement->execute([
-                        ':sku'=>$this->sku,':productName'=>$this->productName,
-                        ':price'=>$this->price,':weight'=>$this->weight,
-                    ]);
-
-        }elseif($product === 'furniture') {
-
-            $sql = 'UPDATE products SET sku = :sku , productName = :productName , price = :price , 
-                length = :length , width = :width , height = :height WHERE sku = :sku';
-
-            $pdoStatement = $this->pdo->prepare($sql);
-
-            return $pdoStatement->execute([
-                        ':sku'=>$this->sku,':productName'=>$this->productName,':price'=>$this->price ,
-                        ':length'=>$this->length,':width'=>$this->width,':height'=>$this->height
-                    ]);
-
-
-        }
-
-        return false;
-           
-    }
-
     public  function save():int
     {
         $this->columnsEmpty();
@@ -115,89 +68,22 @@ class Product extends Model
         return ($status)?$this->pdo->lastInsertId():0;
     }
 
-/*
-    //delete current object
-    public  function delete():bool|Exception
-    {
-        if($this->sku === '')
-            throw new Exception('sku must insert');
-
-        $sql = 'DELETE FROM products WHERE sku = :sku';
-        $pdoStatement = $this->pdo->prepare($sql);
-
-        return $pdoStatement->execute([':sku'=>$this->sku ]);
-
-    }
-
-    public  function deleteWhere():bool|Exception
-    {
-        $sql = 'DELETE FROM products WHERE :condition';
-
-        if($this->where === '') 
-            $this->where = true;
-
-        $sql = str_replace(':condition',$this->where,$sql);
-
-        $pdoStatement = $this->pdo->prepare($sql);
-
-        return $pdoStatement->execute([':sku'=>$this->where ]);
-
-    }
-*/
-    /*
-    *delete all rows in table product
-    *//*
-    public function truncate()
-    {
-        $sql = 'DELETE FROM products WHERE sku != ""';
-
-        $pdoStatement = $this->pdo->prepare($sql);
-
-        return $pdoStatement->execute();
-    }
-*/
-
     public function deleteIN(array $skus):bool
     {
-        $skus = implode(',',$skus);
+       
+        $sql = "DELETE FROM products WHERE sku IN (";
 
-        $sql = "DELETE FROM products WHERE sku IN (".$skus.")";
-        
+        foreach($skus as $sku) {
+            $sql .= "'".$sku."'".',';
+        }
+
+        $sql = substr_replace($sql,')',( strlen($sql))-1,1);
+       
+       
         $pdoStatement = $this->pdo->prepare($sql);
 
         return $pdoStatement->execute();
     }
-    public  function getAll(?array $attributes):array
-    {
-       return $this->get('all',$attributes);
-    }
-
-    public function getByID($id,?array $attributes):?self
-    {
-        $product = $this->get('byID',$attributes,$id);
-        return (count($product)>0)?$product[0]:null;
-    }
-
-    public function SKUExist(string $sku):bool
-    {
-        $product = $this->getByID($sku,['sku']);
-        if($product !== null)
-            return true;
-        return false;
-    }
-
-    public  function where($property , $value , $operator='='):self
-    {
-       $this->where .= $property.' '.$operator.' '.$value;
-       return $this;
-    }
-
-    public  function orWhere($property , $value , $operator='='):self
-    {
-        $this->where .= ' OR '.$property.' '.$operator.' '.$value;
-        return $this;
-    }
-
 
     protected function columnsEmpty():bool|Exception
     {
@@ -215,20 +101,23 @@ class Product extends Model
 
         return false;
     }
-  
-    private function checkProductType():string|Exception
+
+    public function skuExist($sku):bool|Exception
     {
-        if(isset($this->size))
-            return 'dvd';
-        if(isset($this->weight))
-            return 'book';
-        if(isset($this->length)&&isset($this->width)&&isset($this->height))
-            return 'furniture';
-    
-        throw new Exception('specific product attributes empty not allow');
+        $sql = "SELECT sku FROM ".$this->table." WHERE sku = '".$sku."'";
+
+        $pdoStatement = $this->pdo->prepare($sql);
+
+        $status = $pdoStatement->execute();
+
+        if($status) {
+            return $pdoStatement->rowCount() > 0 ? true:false;
+        }
+
+        throw new Exception('server hangout');
     }
 
-    private function get(string $status,?array $attributes,$id = '')
+    public function getAll(array $attributes = null):array
     {
         $products = array();
 
@@ -248,32 +137,21 @@ class Product extends Model
             $sql .= '* ';
         }
 
+        $sql .= 'FROM '.$this->table;
 
-        if($status === 'all') {
-
-            $sql .= 'FROM '.$this->table;
-
-            if(isset($this->where))
-                $sql = $sql." WHERE {$this->where}";
-                
-            $pdoStatement = $this->pdo->prepare($sql);
-            $status = $pdoStatement->execute();
-
-        }elseif($status === 'byID') {
-
-            $sql .= 'FROM '.$this->table.' WHERE sku = :sku';;
-            $pdoStatement = $this->pdo->prepare($sql);
-            $status = $pdoStatement->execute([':sku'=>$id]);
-
-        }
+            
+        $pdoStatement = $this->pdo->prepare($sql);
+        $status = $pdoStatement->execute();
        
         if($status) {
            
             $productsRes = $pdoStatement->fetchAll();
-
+           
+            
             foreach($productsRes as $product) {
-               
+
                 $productObj = new self;
+                
                 if($attributes !== null) {
                     if(in_array('sku',$attributes)) $productObj->setSku($product['sku']);
                     if(in_array('productName',$attributes)) $productObj->setName($product['productName']);
@@ -295,12 +173,12 @@ class Product extends Model
                 }
                 
                 unset($productObj->pdo,$productObj->table);
+                
                 array_push($products,$productObj);
                 
             }
         }
-        
-            
+
         return $products;
       
     }

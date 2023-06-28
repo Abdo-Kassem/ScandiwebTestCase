@@ -19,19 +19,16 @@
             <h3 class='col-8 header'>product list</h3>
             <div class="buttons col-4">
                 <a class='btn btn-primary' href="addproduct">ADD</a>
-                <button class='btn btn-danger ' id='delete-product-btn'>MASS DELETE</button>
+                <button class='btn btn-danger ' id='delete-product-btn'>MASS DELETE</button>  
             </div>
            
         </div>
 
-        <div class="products-container  row justify-content-between">
+        <div class="products-container  row">
 
             <?php
-
                 $arrayCount = count($data);
-
-                for($count = 0 ; $count<$arrayCount ; $count++):
-                    
+                for($count = 0 ; $count<$arrayCount ; $count++):       
                    
             ?>
             <div class="product col-2 ">

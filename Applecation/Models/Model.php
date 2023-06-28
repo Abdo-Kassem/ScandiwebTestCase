@@ -17,19 +17,13 @@ abstract class Model
         $this->pdo = DBConnection::createPDO();
     }
 
-    public abstract function update():bool;
     public abstract function save():int;
 
     public abstract function deleteIN(array $skus):bool;
-    //public abstract function delete():bool|Exception;
-    //public abstract function deleteWhere():bool|Exception;
-    //protected abstract function truncate();
 
-    public abstract function getAll(?array $attributes):array;
-    public abstract function getByID($id,?array $attributes):?self;
-
-    public abstract function where($property , $value , $operator='='):self;
-    public abstract function orWhere($property , $value , $operator='='):self;
+    /*return array off current object */
+    public abstract function getAll(?array $attributes ):array;
+    public abstract function skuExist($sku):bool|Exception;
     protected abstract function columnsEmpty():bool|Exception;
 
 
